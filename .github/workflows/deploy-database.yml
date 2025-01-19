@@ -1,0 +1,32 @@
+name: Deploy Database Objects
+
+# Trigger workflow on pull request to the main branch
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Use Ubuntu as the environment
+
+    steps:
+    # Step 1: Checkout the code from the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Step 2: Install the PostgreSQL client
+    - name: Install PostgreSQL client
+      run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+    # Step 3: Run SQL scripts
+    - name: Execute SQL scripts
+      env:  # Define environment variables for database connection
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USER: postgres
+        DB_PASSWORD:root
+        DB_NAME: test_db
+      run: |
+        psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f sql-scripts/create_table.sql
+        psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -f sql-scripts/insert_data.sql
